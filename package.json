@@ -1,0 +1,23 @@
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "scripts": {
+    "start": "nodemon app"
+  },
+  "keywords": [],
+  "author": "Vedansh Agarwal",
+  "license": "ISC",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.0.3",
+    "express": "^4.18.2",
+    "express-fileupload": "^1.4.0",
+    "mysql2": "^3.1.2",
+    "nodemailer": "^6.9.1",
+    "nodemon": "^2.0.20",
+    "uuid": "^9.0.0",
+    "xlsx": "^0.18.5"
+  }
+}
