@@ -4,6 +4,8 @@ const cors = require('cors');
 const fileupload = require('express-fileupload');
 const nodemailer = require("nodemailer");
 const dotenv = require('dotenv');
+const fs = require('fs');
+const path = require('path');
 
 
 const app = express();
@@ -15,6 +17,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(fileupload());
 dotenv.config();
 
+const questions_directory = path.join(__dirname, 'Questions');
 
 const db = mysql.createConnection({
     host: process.env.DB_HOST,
@@ -139,13 +142,13 @@ app.post('/vectorab-api/sign-up', (req, res) => {
 app.post('/vectorab-api/sign-in', (req, res) => {
     const {email, password} = req.body;
 
-    db.query("SELECT COUNT(*) as isPresent FROM students WHERE email = ? AND password = ?",
+    db.query("SELECT email FROM students WHERE email = ? AND password = ?",
     [email, password],
     (err, result) => {
         if (err) {
             return res.status(299).json({ message: "Database error", error: err.message });
         } else {
-            if(result[0].isPresent > 0) {
+            if(result.length > 0) {
                 return res.status(200).json({ message: "Login successful" });
             } else {
                 return res.status(222).json({ message: "Invalid email or password" });
@@ -220,7 +223,25 @@ app.post('/vectorab-api/reset-password', (req, res) => {
     });
 });
 
+app.get('/vectorab-api/get-courses', (req, res) => {
+    fs.readdir(questions_directory, { withFileTypes: true }, (error, files) => {
+        const course_list = files
+            .filter((item) => item.isDirectory())
+            .map((item) => item.name);
+        return res.status(200).json({ message: "Courses fetched successfully", courses: course_list });
+    });
+});
 
+app.post('/vectorab-api/get-subjects', (req, res) => {
+    const {course} = req.body;
+    const course_directory = path.join(questions_directory, course);
+    fs.readdir(course_directory, { withFileTypes: true }, (error, files) => {
+        const subject_list = files
+            .filter((item) => item.name.includes(".xlsx"))
+            .map((item) => item.name.substring(0, item.name.length - 5));
+        return res.status(200).json({ message: "Subjects fetched successfully", subjects: subject_list });
+    });
+});
 
 app.listen(port, () => {
     db.connect((err) => {
