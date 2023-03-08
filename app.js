@@ -6,6 +6,7 @@ const nodemailer = require("nodemailer");
 const dotenv = require('dotenv');
 const fs = require('fs');
 const path = require('path');
+const xlsx = require('xlsx');
 
 
 const app = express();
@@ -238,10 +239,18 @@ app.post('/vectorab-api/get-subjects', (req, res) => {
     fs.readdir(course_directory, { withFileTypes: true }, (error, files) => {
         const subject_list = files
             .filter((item) => item.name.includes(".xlsx"))
-            .map((item) => item.name.substring(0, item.name.length - 5));
+            .map((item) => {
+                const subject_name = item.name.substring(0, item.name.length - 5);
+                return {label: subject_name, value: subject_name};
+            });
         return res.status(200).json({ message: "Subjects fetched successfully", subjects: subject_list });
     });
 });
+
+// app.post('/vectorab-api/get-questions', (req, res) => {
+//     const {course, subjects, difficulty} = req.body;
+//     const course_directory = path.join(questions_directory, course);
+// });
 
 app.listen(port, () => {
     db.connect((err) => {
@@ -252,4 +261,5 @@ app.listen(port, () => {
             console.log(`Example app listening on port ${port}`);
         }
     });
+    // console.log(`Example app listening on port ${port}`);
 });
